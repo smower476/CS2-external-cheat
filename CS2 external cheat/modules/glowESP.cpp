@@ -11,58 +11,29 @@ namespace offsets
 	constexpr auto glowObjectManager = 0x5309C78;
 	constexpr auto teamNum = 0xF4;
 	constexpr auto glowIndex = 0x10488;
+	constexpr auto dwPawnHealth = 0x808;
 }
 
-__declspec(align(16)) struct Color
-{
-	constexpr Color(const float r, const float g, const float b, const float a = 1.f) noexcept :
-		r(r), g(g), b(b), a(a) { }
 
-	float r, g, b, a;
-};
 
 int main()
 {
-	const auto mem = Memory("csgo.exe");
+	const auto mem = Memory("cs2.exe");
 
 	std::cout << "csgo found!" << std::endl;
 
 	const auto client = mem.GetModuleAddress("client.dll");
 	std::cout << "client.dll -> " << "0x" << std::hex << client << std::dec << std::endl;
 
-	constexpr const auto color = Color{ 1.f, 0.f, 1.f };
+	const auto entity_list = mem.Read<std::uintptr_t>(client + offsets::entityList); //process->read<uintptr_t>(base_module.base + updater::offsets::dwEntityList);
+	int playerIndex = 1;
 
-	while (true)
-	{
-        for (int i = 1; i < 64; i++)
-        {
-            uintptr_t entity_list = mem.Read<std::uintptr_t>(client + offsets::p_entity_list);
-            if (!entity_list)
-                continue;
-
-            uintptr_t list_entry = mem.Read<std::uintptr_t>(entity_list + (8 * (i & 0x7FFF) >> 9) + 16);
-            if (!list_entry)
-                continue;
-
-            uintptr_t player = mem.Read<std::uintptr_t>(list_entry + 120 * (i & 0x1FF));
-            if (!player)
-                continue;
-
-            uint32_t player_pawn = memory_read<uint32_t>(player + offsets::m_h_player_pawn);
-
-            uintptr_t list_entry2 = mem.Read<std::uintptr_t>(entity_list + 0x8 * ((player_pawn & 0x7FFF) >> 9) + 16);
-            if (!list_entry2)
-                continue;
-
-            uintptr_t p_cs_player_pawn = mem.Read<std::uintptr_t>(list_entry2 + 120 * (player_pawn & 0x1FF));
-            if (!p_cs_player_pawn)
-                continue;
-
-            if (!glow_enabled)
-                memory_write<float>(cs2_process_handle, p_cs_player_pawn + offsets::m_fl_detected_by_enemy_sensor_time, 0.f); // off
-            else
-                memory_write<float>(cs2_process_handle, p_cs_player_pawn + offsets::m_fl_detected_by_enemy_sensor_time, 86400.f); // on
-        }
-
+	for (int i = 1; i < 32; i++) {
+		const auto list_entry = mem.Read<std::uintptr_t>(entity_list + (8 * (playerIndex & 0x7FFF) >> 9) + 16); //(entity_list + (8 * (playerIndex & 0x7FFF) >> 9) + 16);
+		const auto player = mem.Read<std::uintptr_t>(list_entry + 120 * (playerIndex & 0x1FF));//process->read<uintptr_t>(list_entry + 120 * (playerIndex & 0x1FF));
+		const auto playerHealth = mem.Read<std::uint32_t>(player + offsets::dwPawnHealth);//process->read<int>(player + updater::offsets::dwPawnHealth);
+		std::cout << playerHealth << std::endl;
+		playerIndex++;
 	}
+	
 }

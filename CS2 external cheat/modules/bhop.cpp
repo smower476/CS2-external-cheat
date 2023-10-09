@@ -9,13 +9,13 @@ namespace offsets
 	constexpr auto localPlayer = 0x1875C48; //0x187AC48;
 	constexpr auto flags = 0x3C8;
 	constexpr auto forceJump = 0x1690100;
-	constexpr auto entityList = 0x178D8E8;
-	constexpr auto glowObjectManager = 0x5309C78;
-	constexpr auto teamNum = 0x3BF;
-	constexpr auto glowIndex = 0x10488;
+	//constexpr auto entityList = 0x178D8E8;
+	//constexpr auto glowObjectManager = 0x5309C78;
+	//constexpr auto teamNum = 0x3BF;
+	//constexpr auto glowIndex = 0x10488;
 }
 
-int main()
+int bhop()
 {
 	const auto mem = Memory("cs2.exe");
 
